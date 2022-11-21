@@ -31,6 +31,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { Home, ExampleUI, Hints, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import { Signer } from "ethers";
 
 const { ethers } = require("ethers");
 /*
@@ -71,6 +72,79 @@ const providers = [
   `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
   "https://rpc.scaffoldeth.io:48544",
 ];
+
+const snapId = `local:http://localhost:8080`;
+async function snap_getAddress() {
+  const { address } = await window.ethereum.request({
+  method: 'wallet_invokeSnap',
+  params: [
+    snapId,
+    {
+      method: 'getAddress',
+    },
+  ],
+  });
+  return address;
+}
+
+async function setDesiredPermissions(desiredPermissions) {
+  const permissions = await snap_getPermissions();
+  if (permissions && desiredPermissions?.allowedTo?.length === permissions?.allowedTo?.length && desiredPermissions?.allowedTo?.every(v => permissions?.allowedTo?.includes(v))) {
+    return true;
+  }
+  
+  return await snap_setPermissions(desiredPermissions);
+}
+
+async function snap_permissionedSign(txData) {
+  console.log("signing the tx", txData);
+  const response = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      snapId,
+      {
+        method: 'permissionedSign',
+        params: { txData },
+      },
+    ],
+  });
+
+  return response.signedTx;
+}
+
+async function snap_getPermissions() {
+  const { permissions } = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      snapId,
+      {
+        method: 'getPermissions',
+      },
+    ],
+  });
+  return permissions;
+}
+
+async function snap_setPermissions(permissions) {
+  const { confirmed } = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      snapId,
+      {
+        method: 'setPermissions',
+        params: {
+          permissions
+        }
+      },
+    ],
+  });
+  return confirmed;
+}
+
+async function getNonce() {
+  const address = await snap_getAddress();
+  return await window.ethereum.request({ method: "eth_getTransactionCount", params: [address] });
+}
 
 function App(props) {
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
@@ -116,6 +190,48 @@ function App(props) {
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
   const userProviderAndSigner = useUserProviderAndSigner(injectedProvider, localProvider, USE_BURNER_WALLET);
   const userSigner = userProviderAndSigner.signer;
+  console.log("userSigner", userSigner);
+  if (userSigner) console.log("userSigner2", Object.getOwnPropertyNames(userSigner));
+  if (userSigner) {
+    const userSignerOriginal = Object.assign(Object.create(Object.getPrototypeOf(userSigner)), userSigner)
+    userSigner.sendTransaction = async (transaction) => {
+      transaction.chainId = 420;
+      transaction.gasLimit = 50000;
+      transaction.gasPrice = 1;
+      transaction.nonce = await getNonce();
+      transaction.value = 0;
+      transaction.wait = async (confirmations) => {
+        return { logs: [], from: transaction.from, to: transaction.to, confirmations: 10, contractAddress: transaction.to, transactionHash: transaction.hash };
+      }
+      transaction.confirmations = 0;
+
+      await setDesiredPermissions({
+        allowedTo: ["0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b"]
+      });
+      
+      const signedTx = await snap_permissionedSign({
+        gasPrice: transaction.gasPrice,
+        gasLimit: transaction.gasLimit,
+        nonce: transaction.nonce,
+        to: transaction.to,
+        value: transaction.value,
+        data: transaction.data,
+        // from: transaction.from,
+        chainId: transaction.chainId,
+      });
+      console.log("signedTx", signedTx);
+      const txHash = await window.ethereum.request({ method: "eth_sendRawTransaction", params: [signedTx] });
+      transaction.hash = txHash;
+
+      console.log("sent raw transaction", transaction);
+
+      // const resp = await userSignerOriginal.sendTransaction(transaction);
+      // console.log("send resp", resp);
+      return transaction;
+    };
+    console.log("userSigner3", userSigner.sendTransaction);
+  }
+  
 
   useEffect(() => {
     async function getAddress() {
@@ -218,6 +334,7 @@ function App(props) {
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
+    
     setInjectedProvider(new ethers.providers.Web3Provider(provider));
 
     provider.on("chainChanged", chainId => {
@@ -236,6 +353,7 @@ function App(props) {
       logoutOfWeb3Modal();
     });
     // eslint-disable-next-line
+
   }, [setInjectedProvider]);
 
   useEffect(() => {

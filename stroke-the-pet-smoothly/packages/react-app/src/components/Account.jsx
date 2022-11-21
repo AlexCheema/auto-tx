@@ -41,6 +41,21 @@ import Wallet from "./Wallet";
               (ex. by default "https://etherscan.io/" or for xdai "https://blockscout.com/poa/xdai/")
 **/
 
+const snapId = `local:http://localhost:8080`;
+async function connectSnap() {
+  console.log("{{X}} connectSnap");
+  await window.ethereum.request({
+    method: 'wallet_enable',
+    params: [
+      {
+        wallet_snap: {
+         [snapId]: {},
+        }
+      }
+    ],
+  });
+}
+
 export default function Account({
   address,
   userSigner,
@@ -92,6 +107,9 @@ export default function Account({
           {accountButtonInfo.name}
         </Button>
       )}
+      <Button style={{ marginLeft: 8 }} shape="round" onClick={connectSnap}>
+        Connect Snap
+      </Button>
     </div>
   );
 }

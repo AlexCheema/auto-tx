@@ -6,7 +6,7 @@ export async function getAddress(request) {
   const privateKey = await wallet.request({
     method: 'snap_getAppKey',
   });
-  return { address: Address.fromPrivateKey(privateKey) };
+  return Address.fromPrivateKey(privateKey);
 }
 
 async function checkPermissions(txData) {
@@ -77,17 +77,21 @@ export async function setPermissions(request) {
 }
 
 export async function getPermissions(request) {
-  const { permissions } = await wallet.request({
-    method: 'snap_manageState',
-    params: ['get'],
-  });
-  if (!permissions) {
+  try {
+    const { permissions } = await wallet.request({
+      method: 'snap_manageState',
+      params: ['get'],
+    });
+    if (!permissions) {
+      return undefined;
+    }
+    if (!isPermissions(permissions)) {
+      throw new Error("corrupt permissions in storage");
+    }
+    return permissions;
+  } catch (err) {
     return undefined;
   }
-  if (!isPermissions(permissions)) {
-    throw new Error("corrupt permissions in storage");
-  }
-  return permissions;
 }
 
 /**
@@ -104,15 +108,16 @@ export async function getPermissions(request) {
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
     switch (request.method) {
     case 'getAddress':
-      return await getAddress(request);
+      return { address: await getAddress(request) };
     case 'permissionedSign':
       return await permissionedSign(request);
     case 'setPermissions':
       return await setPermissions(request);
     case 'getPermissions':
-      return { permissions: await getPermissions(request) };
+      const permissions = await getPermissions(request);
+      if (!permissions) return { permissionsSet: false };
+      return { permissionsSet: true, permissions };
     default:
       throw new Error('Method not found.');
   }
 };
-

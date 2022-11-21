@@ -1,0 +1,202 @@
+{
+  "5": {
+    "goerli": {
+      "name": "goerli",
+      "chainId": "5",
+      "contracts": {
+        "DemoPetStroker": {
+          "address": "0xf06eB42a778BE7A24a4ea4eF48Ea880D669fc949",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint24",
+                  "name": "countPetStrokes",
+                  "type": "uint24"
+                }
+              ],
+              "name": "PetJustStroked",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "countPetStrokes",
+              "outputs": [
+                {
+                  "internalType": "uint24",
+                  "name": "",
+                  "type": "uint24"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "strokeThePet",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "420": {
+    "goerliOptimism": {
+      "name": "goerliOptimism",
+      "chainId": "420",
+      "contracts": {
+        "DemoPetStroker": {
+          "address": "0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint24",
+                  "name": "countPetStrokes",
+                  "type": "uint24"
+                }
+              ],
+              "name": "PetJustStroked",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "countPetStrokes",
+              "outputs": [
+                {
+                  "internalType": "uint24",
+                  "name": "",
+                  "type": "uint24"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "strokeThePet",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "31337": {
+    "localhost": {
+      "name": "localhost",
+      "chainId": "31337",
+      "contracts": {
+        "DemoPetStroker": {
+          "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint24",
+                  "name": "countPetStrokes",
+                  "type": "uint24"
+                }
+              ],
+              "name": "PetJustStroked",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "countPetStrokes",
+              "outputs": [
+                {
+                  "internalType": "uint24",
+                  "name": "",
+                  "type": "uint24"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "strokeThePet",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "YourContract": {
+          "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint24",
+                  "name": "strokeCount",
+                  "type": "uint24"
+                }
+              ],
+              "name": "StrokePet",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "strokeCount",
+              "outputs": [
+                {
+                  "internalType": "uint24",
+                  "name": "",
+                  "type": "uint24"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "strokePet",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

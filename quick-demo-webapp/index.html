@@ -36,7 +36,7 @@
 
     connectButton.addEventListener('click', connect);
     signButton.addEventListener('click', permissionedSign);
-    addressButton.addEventListener('click', getAddress);
+    addressButton.addEventListener('click', getAndPrintAddress);
     getPermissionsButton.addEventListener('click', getPermissions);
     setPermissionsButton.addEventListener('click', setPermissions);
     sendSignedTxButton.addEventListener('click', sendSignedTx);
@@ -55,38 +55,44 @@
       });
     }
 
-    async function getAddress() {
-      try {
-        const response = await ethereum.request({
-          method: 'wallet_invokeSnap',
-          params: [
-            snapId,
-            {
-              method: 'getAddress',
-            },
-          ],
-        });
+    async function getAndPrintAddress() {
+      alert(`Address: ${await getAddress()}`);
+    }
 
-        alert('received back: ' + JSON.stringify(response));
-      } catch (err) {
-        console.error(err);
-        alert('Problem happened: ' + err.message || err);
-      }
+    async function getAddress() {
+      const { address } = await ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: [
+          snapId,
+          {
+            method: 'getAddress',
+          },
+        ],
+      });
+      return address;
+    }
+
+    async function getNonce() {
+      const address = await getAddress();
+      return await web3.eth.getTransactionCount(address);
     }
 
     async function permissionedSign() {
-     // TODO: get nonce with web3.eth.getTransactionCount()
-     const txData = {
-       gasPrice: 1000000000,
-       gasLimit: 500000,
-       nonce: 1,
-       to: '0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b',
-       value: 0,
-       data: '0xfa871bac',
-       chainId: 420,
-     };
+      const nonce = await getNonce();
+      console.log({ nonce });
+      const txData = {
+        gasPrice: 1000000000,
+        gasLimit: 500000,
+        nonce,
+        to: '0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b',
+        value: 0,
+        data: '0xfa871bac',
+        chainId: 420,
+      };
 
       try {
+        const address = await getAddress();
+
         const response = await ethereum.request({
           method: 'wallet_invokeSnap',
           params: [
