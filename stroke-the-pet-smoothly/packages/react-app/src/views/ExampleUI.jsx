@@ -19,7 +19,7 @@ export default function ExampleUI({
   writeContracts,
 }) {
   return (
-    <div style={{ fontFamily: 'Comic Sans MS', fontSize: '200%' }}>
+    <div style={{ fontFamily: 'Arial', fontSize: '200%' }}>
       <div style={{ margin: 8 }}>
         <Button
           className="mainButton"
@@ -27,13 +27,13 @@ export default function ExampleUI({
             margin: 20,
             paddingBottom: '10px',
             fontSize: '120%',
-            width: '850px',
+            width: '900px',
             height: '80px',
             borderRadius: '30px',
-            borderWidth: '8px',
+            borderWidth: '4px',
             borderColor: '#2266FF',
-            background: '#00FF00',
-            color: '#FF0000'
+            background: '#CCFFAA',
+            color: '#008800'
           }}
           onClick={async () => {
             /* look how you call strokeThePet on your contract:*/
@@ -57,12 +57,12 @@ export default function ExampleUI({
             console.log(await result);
           }}
         >
-          PRESS me to stroke pet with PAINful MM popup
+          Press this button to stroke pet using Metamask Snaps
         </Button>
       </div>
       <img src={petImage} alt="Cute Pet" style={{ margin: '10px' }} />
-      <p style={{ color: 'darkgreen' }}>pet as been STROKed like {countPetStrokes} times</p>
-      <p style={{ color: 'grey' }}>cure pain to use METAMASK SNAP for no popup... coming s👀N</p>
+      <p style={{ color: 'darkgreen' }}>Pet has been stroked {countPetStrokes} times</p>
+      <p style={{ color: 'grey' }}>Is this too smooth? Try using the <a href="https://stroke-the-pet-painfully.surge.sh/"><u>painful version</u></a> with Metamask pop-ups</p>
       <div style={{ color: '#BB8800', fontSize: '65%' }}>
         <div style={{ }}>
           <p>&nbsp;</p>
@@ -73,7 +73,7 @@ export default function ExampleUI({
           <p>If you need Goerli ETH, use the faucet <a href="https://goerlifaucet.com/" target="_blank"><u>here</u></a></p>
           <p>Bridge Goerli ETH to Optimistic Goerli <a href="https://app.optimism.io/bridge/deposit" target="_blank"><u>here</u></a></p>
           <p>Add the Optimistic Goerli network to Metamask using <a href="https://chainlist.org/chain/420" target="_blank"><u>Chainlist</u></a></p>
-          <p>Inspect the `stroke pet` <a href="https://blockscout.com/optimism/goerli/address/0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b/contracts#address-tabs" target="_blank"><u>Contract</u></a> and <a href="https://github.com/davidryan59/scaffold-eth/tree/stroke-pet" target="_blank"><u>GitHub repo</u></a></p>
+          <p>Inspect the `stroke pet` <a href="https://blockscout.com/optimism/goerli/address/0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b/contracts#address-tabs" target="_blank"><u>Contract</u></a> and <a href="https://github.com/AlexCheema/auto-tx" target="_blank"><u>GitHub repo</u></a></p>
           <p>&nbsp;</p>
         </div>
       </div>

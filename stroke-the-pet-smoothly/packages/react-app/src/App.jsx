@@ -247,7 +247,7 @@ function App(props) {
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
 
   return (
-    <div className="App" style={{ backgroundColor: 'pink' }}>
+    <div className="App" style={{ backgroundColor: 'lightyellow' }}>
       {/* ✏️ Edit the header and change the title to your project name */}
       <Header>
         {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
@@ -300,12 +300,12 @@ function App(props) {
         <Menu style={{
           textAlign: "center",
           marginTop: 0,
-          backgroundColor: 'cyan',
-          fontFamily: 'Comic Sans MS',
+          backgroundColor: 'yellow',
+          fontFamily: 'Arial',
           fontSize: '150%'
         }} selectedKeys={[location.pathname]} mode="horizontal">
           <Menu.Item key="/">
-            <Link to="/"><span style={{ color: '#FF8800' }}>stroke ze PET very painfu-ally</span></Link>
+            <Link to="/"><span style={{ color: '#000000' }}>Stroke that pet ever so smoothly</span></Link>
           </Menu.Item>
         </Menu>
       }
