@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lets sign</title>
+  </head>
+
+  <body>
+    <h1>Lets sign this shizzle!</h1>
+    <br />
+
+    <button class="connect">Connect</button>
+    <button class="account">Get Public Key</button>
+    <button class="getPermissions">Get Permissions</button>
+    <button class="setPermissions">Set Permissions</button>
+
+    <br />
+
+    <button class="sign">Sign Transaction</button>
+  </body>
+
+  <script>
+    const snapId = `local:http://localhost:8080`; // `local:${window.location.href}`;
+
+    const connectButton = document.querySelector('button.connect');
+    const accountButton = document.querySelector('button.account');
+    const signButton = document.querySelector('button.sign');
+    const getPermissionsButton = document.querySelector('button.getPermissions');
+    const setPermissionsButton = document.querySelector('button.setPermissions');
+
+    connectButton.addEventListener('click', connect);
+    signButton.addEventListener('click', permissionedSign);
+    accountButton.addEventListener('click', getAccount);
+    getPermissionsButton.addEventListener('click', getPermissions);
+    setPermissionsButton.addEventListener('click', setPermissions);
+
+    async function connect() {
+      console.log('connecting...');
+      await ethereum.request({
+        method: 'wallet_enable',
+        params: [
+          {
+            wallet_snap: {
+             [snapId]: {},
+            }
+          }
+        ],
+      });
+    }
+
+    async function getAccount() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'getAccount',
+            },
+          ],
+        });
+
+        alert('received back: ' + JSON.stringify(response));
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+
+    async function permissionedSign() {
+     const txData = {
+       data: '0x1a8451e600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+       gasLimit: '0x02625a00',
+       maxPriorityFeePerGas: '0x01',
+       maxFeePerGas: '0xff',
+       nonce: '0x00',
+       to: '0x000000000000000000000000000000000000dEaD',
+       value: '0x0186a0',
+       chainId: '0x01',
+       accessList: [],
+       type: '0x02',
+     };
+
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'permissionedSign',
+              params: { txData },
+            },
+          ],
+        });
+
+        alert('received back: ' + JSON.stringify(response));
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+
+    async function getPermissions() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'getPermissions',
+            },
+          ],
+        });
+
+        alert('received back: ' + JSON.stringify(response));
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+
+    async function setPermissions() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'setPermissions',
+              params: {
+                permissions: {
+                  allowedTo: ["0x000000000000000000000000000000000000dEaD"]
+                }
+              }
+            },
+          ],
+        });
+
+        alert('received back: ' + JSON.stringify(response));
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+  </script>
+</html>
