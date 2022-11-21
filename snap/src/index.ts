@@ -2,6 +2,23 @@ import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { Address, Transaction } from './micro-eth-signer';
 
+function prettifyAddress(address) {
+  if (address.toLowerCase() === "0xecf7d972d829ef1b5c9875b1aceb0d442946bd2b") {
+    return "Pet Stroker";
+  }
+  return "?";
+}
+
+function formatPermissionsText(permissions) {
+  return `
+✅ Allow Pet Stroker to send transactions from your Ethereum account for the next 12 hours
+✅ Send transactions to the following smart contracts: ${permissions.allowedTo?.map(addr => addr + " (" + prettifyAddress(addr) + ")")}
+✅ Spend up to 0.01ETH (~$11.02) on gas fees
+❌ Does NOT allow sending ANYTHING ELSE from your wallet (ETH, tokens, NFTs)
+❌ Does NOT expose your private key. Approval will automatically be revoked in 12 hours.
+`;
+}
+
 export async function getAddress(request) {
   const privateKey = await wallet.request({
     method: 'snap_getAppKey',
@@ -12,7 +29,7 @@ export async function getAddress(request) {
 async function checkPermissions(txData) {
   const permissions = await getPermissions();
 
-  const allowedTo = permissions?.allowedTo ?? ["0xecf7d972d829ef1b5c9875b1aceb0d442946bd2b"];
+  const allowedTo = permissions?.allowedTo ?? [];
 
   if (!txData.to || !allowedTo.map(a => a.toLowerCase()).includes(txData.to.toLowerCase())) {
     return false;
@@ -56,10 +73,7 @@ export async function setPermissions(request) {
         prompt: "Approve permissions?",
         description:
           "Do you want to approve the following permissions?",
-        textAreaContent:
-           `
-           Permissions: ${JSON.stringify(permissions)}
-           `,
+        textAreaContent: formatPermissionsText(permissions)
       },
     ],
   });
