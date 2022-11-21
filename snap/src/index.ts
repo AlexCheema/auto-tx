@@ -1,18 +1,12 @@
 import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
-import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx'
-import { Chain, Common, Hardfork } from '@ethereumjs/common'
-import { ethers } from 'ethers';
-const provider = new ethers.providers.Web3Provider(wallet);
+import { Address, Transaction } from './micro-eth-signer';
 
-const common = new Common({ chain: Chain.Mainnet, hardfork: Hardfork.London })
-
-export async function getAccount(request) {
+export async function getAddress(request) {
   const privateKey = await wallet.request({
     method: 'snap_getAppKey',
   });
-  const ethWallet = new ethers.Wallet(privateKey, provider);
-  return { publicKey: ethWallet.address };
+  return { address: Address.fromPrivateKey(privateKey) };
 }
 
 async function checkPermissions(txData) {
@@ -38,10 +32,10 @@ export async function permissionedSign(request) {
     method: 'snap_getAppKey',
   });
 
-  const tx = FeeMarketEIP1559Transaction.fromTxData(txData, { common });
-  const signedTx = tx.sign(Buffer.from(privateKey, 'hex'));
+  const tx = new Transaction(txData);
+  const signedTx = await tx.sign(privateKey);
 
-  return { tx: JSON.stringify(tx), signedTx: ethers.utils.hexlify(signedTx.serialize()) };
+  return { tx: JSON.stringify(tx), signedTx: signedTx.hex };
 }
 
 export function isPermissions(o) {
@@ -109,8 +103,8 @@ export async function getPermissions(request) {
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
     switch (request.method) {
-    case 'getAccount':
-      return await getAccount(request);
+    case 'getAddress':
+      return await getAddress(request);
     case 'permissionedSign':
       return await permissionedSign(request);
     case 'setPermissions':

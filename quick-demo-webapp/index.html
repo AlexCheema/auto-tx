@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Lets sign</title>
+    <title>Quick demo of AutoTx MetaMask Snap</title>
   </head>
 
   <body>
-    <h1>Lets sign this shizzle!</h1>
+    <h1>Quick demo of AutoTx MetaMask Snap</h1>
     <br />
 
     <button class="connect">Connect</button>
-    <button class="account">Get Public Key</button>
+    <button class="address">Get Public Key</button>
     <button class="getPermissions">Get Permissions</button>
     <button class="setPermissions">Set Permissions</button>
+    <button class="sendSignedTx">Send Signed Tx</button>
 
     <br />
 
     <button class="sign">Sign Transaction</button>
   </body>
 
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
   <script>
+    const web3 = new Web3('https://goerli.optimism.io');
     const snapId = `local:http://localhost:8080`; // `local:${window.location.href}`;
 
     const connectButton = document.querySelector('button.connect');
-    const accountButton = document.querySelector('button.account');
+    const addressButton = document.querySelector('button.address');
     const signButton = document.querySelector('button.sign');
     const getPermissionsButton = document.querySelector('button.getPermissions');
     const setPermissionsButton = document.querySelector('button.setPermissions');
+    const sendSignedTxButton = document.querySelector('button.sendSignedTx');
+
+    var signedTx;
 
     connectButton.addEventListener('click', connect);
     signButton.addEventListener('click', permissionedSign);
-    accountButton.addEventListener('click', getAccount);
+    addressButton.addEventListener('click', getAddress);
     getPermissionsButton.addEventListener('click', getPermissions);
     setPermissionsButton.addEventListener('click', setPermissions);
+    sendSignedTxButton.addEventListener('click', sendSignedTx);
 
     async function connect() {
       console.log('connecting...');
@@ -47,14 +55,14 @@
       });
     }
 
-    async function getAccount() {
+    async function getAddress() {
       try {
         const response = await ethereum.request({
           method: 'wallet_invokeSnap',
           params: [
             snapId,
             {
-              method: 'getAccount',
+              method: 'getAddress',
             },
           ],
         });
@@ -67,17 +75,15 @@
     }
 
     async function permissionedSign() {
+     // TODO: get nonce with web3.eth.getTransactionCount()
      const txData = {
-       data: '0x1a8451e600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-       gasLimit: '0x02625a00',
-       maxPriorityFeePerGas: '0x01',
-       maxFeePerGas: '0xff',
-       nonce: '0x00',
-       to: '0x000000000000000000000000000000000000dEaD',
-       value: '0x0186a0',
-       chainId: '0x01',
-       accessList: [],
-       type: '0x02',
+       gasPrice: 1000000000,
+       gasLimit: 500000,
+       nonce: 1,
+       to: '0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b',
+       value: 0,
+       data: '0xfa871bac',
+       chainId: 420,
      };
 
       try {
@@ -93,6 +99,7 @@
         });
 
         alert('received back: ' + JSON.stringify(response));
+        signedTx = response.signedTx;
       } catch (err) {
         console.error(err);
         alert('Problem happened: ' + err.message || err);
@@ -128,7 +135,7 @@
               method: 'setPermissions',
               params: {
                 permissions: {
-                  allowedTo: ["0x000000000000000000000000000000000000dEaD"]
+                  allowedTo: ["0xECf7D972D829eF1b5c9875b1aceb0D442946BD2b"]
                 }
               }
             },
@@ -140,6 +147,11 @@
         console.error(err);
         alert('Problem happened: ' + err.message || err);
       }
+    }
+
+    async function sendSignedTx() {
+      console.log("sending signed tx", signedTx);
+      web3.eth.sendSignedTransaction(signedTx).on('receipt', console.log);
     }
   </script>
 </html>
