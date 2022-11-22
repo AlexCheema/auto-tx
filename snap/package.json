@@ -58,6 +58,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@metamask/key-tree": "^6.0.0"
+    "@metamask/key-tree": "^6.0.0",
+    "rlp": "^3.0.0"
   }
 }
