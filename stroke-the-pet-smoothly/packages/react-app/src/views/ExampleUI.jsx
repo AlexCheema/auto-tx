@@ -68,7 +68,8 @@ export default function ExampleUI({
           <p>&nbsp;</p>
           <p><b>Instructions</b></p>
           <p><i>tl;dr – get Metamask on Optimistic Goerli network, and have some OptGoerliETH</i></p>
-          <p><b>ze loooonnng and boooring steps</b></p>
+          <p><b>Full steps:</b></p>
+          <p>To run the snaps, currently (Nov 2022) they must be run in the terminal locally</p>
           <p>Log in to Metamask, change network to Goerli testnet</p>
           <p>If you need Goerli ETH, use the faucet <a href="https://goerlifaucet.com/" target="_blank"><u>here</u></a></p>
           <p>Bridge Goerli ETH to Optimistic Goerli <a href="https://app.optimism.io/bridge/deposit" target="_blank"><u>here</u></a></p>
