@@ -1,24 +1,35 @@
 import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
-import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx'
-import { Chain, Common, Hardfork } from '@ethereumjs/common'
-import { ethers } from 'ethers';
-const provider = new ethers.providers.Web3Provider(wallet);
+import { Address, Transaction } from './micro-eth-signer';
 
-const common = new Common({ chain: Chain.Mainnet, hardfork: Hardfork.London })
+function prettifyAddress(address) {
+  if (address.toLowerCase() === "0xecf7d972d829ef1b5c9875b1aceb0d442946bd2b") {
+    return "Pet Stroker";
+  }
+  return "?";
+}
 
-export async function getAccount(request) {
+function formatPermissionsText(permissions) {
+  return `
+✅ Allow Pet Stroker to send transactions from your Ethereum account for the next 12 hours
+✅ Send transactions to the following smart contracts: ${permissions.allowedTo?.map(addr => addr + " (" + prettifyAddress(addr) + ")")}
+✅ Spend up to 0.01ETH (~$11.02) on gas fees
+❌ Does NOT allow sending ANYTHING ELSE from your wallet (ETH, tokens, NFTs)
+❌ Does NOT expose your private key. Approval will automatically be revoked in 12 hours.
+`;
+}
+
+export async function getAddress(request) {
   const privateKey = await wallet.request({
     method: 'snap_getAppKey',
   });
-  const ethWallet = new ethers.Wallet(privateKey, provider);
-  return { publicKey: ethWallet.address };
+  return Address.fromPrivateKey(privateKey);
 }
 
 async function checkPermissions(txData) {
   const permissions = await getPermissions();
 
-  const allowedTo = permissions?.allowedTo ?? ["0xecf7d972d829ef1b5c9875b1aceb0d442946bd2b"];
+  const allowedTo = permissions?.allowedTo ?? [];
 
   if (!txData.to || !allowedTo.map(a => a.toLowerCase()).includes(txData.to.toLowerCase())) {
     return false;
@@ -38,10 +49,10 @@ export async function permissionedSign(request) {
     method: 'snap_getAppKey',
   });
 
-  const tx = FeeMarketEIP1559Transaction.fromTxData(txData, { common });
-  const signedTx = tx.sign(Buffer.from(privateKey, 'hex'));
+  const tx = new Transaction(txData);
+  const signedTx = await tx.sign(privateKey);
 
-  return { tx: JSON.stringify(tx), signedTx: ethers.utils.hexlify(signedTx.serialize()) };
+  return { tx: JSON.stringify(tx), signedTx: signedTx.hex };
 }
 
 export function isPermissions(o) {
@@ -62,10 +73,7 @@ export async function setPermissions(request) {
         prompt: "Approve permissions?",
         description:
           "Do you want to approve the following permissions?",
-        textAreaContent:
-           `
-           Permissions: ${JSON.stringify(permissions)}
-           `,
+        textAreaContent: formatPermissionsText(permissions)
       },
     ],
   });
@@ -83,17 +91,21 @@ export async function setPermissions(request) {
 }
 
 export async function getPermissions(request) {
-  const { permissions } = await wallet.request({
-    method: 'snap_manageState',
-    params: ['get'],
-  });
-  if (!permissions) {
+  try {
+    const { permissions } = await wallet.request({
+      method: 'snap_manageState',
+      params: ['get'],
+    });
+    if (!permissions) {
+      return undefined;
+    }
+    if (!isPermissions(permissions)) {
+      throw new Error("corrupt permissions in storage");
+    }
+    return permissions;
+  } catch (err) {
     return undefined;
   }
-  if (!isPermissions(permissions)) {
-    throw new Error("corrupt permissions in storage");
-  }
-  return permissions;
 }
 
 /**
@@ -109,16 +121,17 @@ export async function getPermissions(request) {
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
     switch (request.method) {
-    case 'getAccount':
-      return await getAccount(request);
+    case 'getAddress':
+      return { address: await getAddress(request) };
     case 'permissionedSign':
       return await permissionedSign(request);
     case 'setPermissions':
       return await setPermissions(request);
     case 'getPermissions':
-      return { permissions: await getPermissions(request) };
+      const permissions = await getPermissions(request);
+      if (!permissions) return { permissionsSet: false };
+      return { permissionsSet: true, permissions };
     default:
       throw new Error('Method not found.');
   }
 };
-
